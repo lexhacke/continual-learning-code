@@ -3,3 +3,4 @@ torch
 lightning
 pyngrok
 flash_attn
+peft
