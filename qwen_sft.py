@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from lightning.pytorch.loggers import TensorBoardLogger
 import lightning.pytorch as L
 from torch.utils.data import DataLoader
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 from typing import Dict, List
 from pyngrok import ngrok
 
@@ -33,9 +33,14 @@ class SDFTModule(L.LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
-        # Student model (trainable)
+        # Student model (trainable) - loaded in FP8 for memory efficiency
+        quantization_config = BitsAndBytesConfig(
+            load_in_8bit=True,
+            llm_int8_enable_fp32_cpu_offload=False,
+        )
         self.student = AutoModelForCausalLM.from_pretrained(
             model_name,
+            quantization_config=quantization_config,
             torch_dtype=torch.bfloat16,
             attn_implementation="flash_attention_2",
         )
