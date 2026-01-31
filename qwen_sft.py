@@ -32,6 +32,7 @@ class SDFTModule(L.LightningModule):
         lora_r: int = 64,
         lora_alpha: int = 128,
         lora_dropout: float = 0.05,
+        flash_attn: bool = False
     ):
         super().__init__()
         self.save_hyperparameters()
@@ -40,7 +41,7 @@ class SDFTModule(L.LightningModule):
         base_model = AutoModelForCausalLM.from_pretrained(
             model_name,
             torch_dtype=torch.bfloat16,
-            attn_implementation="flash_attention_2",
+            attn_implementation="flash_attention_2" if flash_attn else 'sdpa',
         )
 
         # LoRA config targeting attention + MLP layers
